@@ -1,1 +1,1 @@
-# PSC-Prelims-App
+# UPSC-Prelims-App

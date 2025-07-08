@@ -1,9 +1,9 @@
 // Remove this line: const API_KEY = "AIzaSyCeaVHVCsXjcCtG03r-fPv6vFLC4fuJr2c";
 
 // Your existing sheet URLs (ensure these are correct)
-const NCERT_SHEET_URL = "YOUR_NCERT_GOOGLE_SHEET_PUBLISHED_URL"; // Replace with your actual URL
-const STANDARD_BOOKS_SHEET_URL = "YOUR_STANDARD_BOOKS_GOOGLE_SHEET_PUBLISHED_URL"; // Replace with your actual URL
-const PYQS_SHEET_URL = "YOUR_PYQS_GOOGLE_SHEET_PUBLISHED_URL"; // Replace if you fetch PYQs data from a sheet
+const NCERT_SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQgm9W0EEVTGv2K8Zg77JKZH_WzNmEBz5KpXNWR_t8HdUdimKX67PaVV8cIUjfVzlzvTBAYeGi36ewE/pubhtml"; // Replace with your actual URL
+const STANDARD_BOOKS_SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSKKG_8zpTqcTahdKDr9FKLfjv8a5DRdvy-_mJIUZa5pMGicCf1G1fVBiMwG1pyBKTlLDRjIOdcikr8/pubhtml"; // Replace with your actual URL
+const PYQS_SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQmviPVyDKD96PN9JYSZfNu4hRZOsNPfFSF18nuKMKPEE7uwhnOkB8XIAr2N6wJn-ciQDeTnSVdp_ut/pubhtml"; // Replace if you fetch PYQs data from a sheet
 
 // Global variables for data and state
 let ncertData = {};

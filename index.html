@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UPSC Prelims MCQs 🚀 </title>
+    <link rel="stylesheet" href="style.css"> </head>
+<body>
+    <div class="container">
+        <h1>UPSC Prelims MCQs 🚀</h1>
+        <div class="controls">
+            <label for="contentTypeSelect">Content Type:</label>
+            <select id="contentTypeSelect">
+                <option value="ncert">NCERT</option>
+                <option value="standardBooks">Standard Books</option>
+                <option value="pyqs">Previous Year Questions (PYQs)</option>
+            </select>
+
+            <label for="subjectSelect">Subject:</label>
+            <select id="subjectSelect">
+                </select>
+
+            <label for="topicSelect">Topic:</label>
+            <select id="topicSelect">
+                </select>
+
+            <div id="pyqsYearContainer" style="display: none;">
+                <label for="pyqsYearSelect">Year:</label>
+                <select id="pyqsYearSelect">
+                    </select>
+            </div>
+        </div>
+
+        <div class="actions">
+            <button id="generateSummaryBtn">Generate Summary</button>
+            <button id="generateMCQsBtn">Generate MCQs</button>
+            <button id="generateMCQsFromSummaryBtn" style="display: none;">Generate MCQs from Summary</button>
+        </div>
+
+        <div id="loading" class="loading-indicator" style="display: none;">
+            Generating... Please wait 🙏
+        </div>
+
+        <div id="contentArea" class="content-area">
+            <script type="text/template" id="initialContent">
+                <div class="welcome-message">
+                    <h2>Welcome to UPSC Prelims MCQs!</h2>
+                    <p>Select a content type, subject, and topic from the dropdowns above to get started.</p>
+                    <p>You can generate a **Summary** of the topic or **MCQs** directly.</p>
+                    <p>For PYQs, select the year to generate questions from previous years' papers.</p>
+                </div>
+            </script>
+        </div>
+    </div>
+    <script src="script.js"></script> </body>
+</html>

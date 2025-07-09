@@ -1,14 +1,14 @@
-// Remove this line: const API_KEY = "AIzaSyCeaVHVCsXjcCtG03r-fPv6vFLC4fuJr2c";
-
 // Your existing sheet URLs (ensure these are correct)
-const NCERT_SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQgm9W0EEVTGv2K8Zg77JKZH_WzNmEBz5KpXNWR_t8HdUdimKX67PaVV8cIUjfVzlzvTBAYeGi36ewE/pubhtml"; // Replace with your actual URL
-const STANDARD_BOOKS_SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSKKG_8zpTqcTahdKDr9FKLfjv8a5DRdvy-_mJIUZa5pMGicCf1G1fVBiMwG1pyBKTlLDRjIOdcikr8/pubhtml"; // Replace with your actual URL
-const PYQS_SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQmviPVyDKD96PN9JYSZfNu4hRZOsNPfFSF18nuKMKPEE7uwhnOkB8XIAr2N6wJn-ciQDeTnSVdp_ut/pubhtml"; // Replace if you fetch PYQs data from a sheet
+const NCERT_SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQgm9W0EEVTGv2K8Zg77JKZH_WzNmEBz5KpXNWR_t8HdUdimKX67PaVV8cIUjfVzlzvTBAYeGi36ewE/pub?output=csv";
+const STANDARD_BOOKS_SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSKKG_8zpTqcTahdKDr9FKLfjv8a5DRdvy-_mJIUZa5pMGicCf1G1fVBiMwG1pyBKTlLDRjIOdcikr8/pub?output=csv";
+const PYQS_SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQmviPVyDKD96PN9JYSZfNu4hRZOsNPfFSF18nuKMKPEE7uwhnOkB8XIAr2N6wJn-ciQDeTnSVdp_ut/pub?output=csv";
+const CURRENT_AFFAIRS_SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTnD5vM6GxYzzWhiIRoBCvIuq92Z6O1X0czd-hnOlPUjlWLYIsV0oEaEC-gjiqCnQ_n2E8WKa4-Mysm/pub?output=csv"; // New Current Affairs URL
 
 // Global variables for data and state
 let ncertData = {};
 let standardBooksData = {};
 let pyqsData = {}; // If you fetch PYQs from a sheet, populate this
+let currentAffairsData = {}; // New variable for Current Affairs data
 let currentContentType = 'ncert';
 let currentSummary = ''; // To store the summary for "Generate MCQs from Summary"
 
@@ -40,12 +40,13 @@ async function fetchSheetData(sheetUrl) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
         const text = await response.text();
+        // Assuming the CSV is tab-separated as per previous code, if it's comma-separated, change '\t' to ','
         const rows = text.split('\n').map(row => row.trim()).filter(row => row);
-        const headers = rows[0].split('\t').map(header => header.trim());
+        const headers = rows[0].split('\t').map(header => header.trim()); // Use '\t' or ',' based on your CSV
         const data = {};
 
         for (let i = 1; i < rows.length; i++) {
-            const values = rows[i].split('\t').map(val => val.trim());
+            const values = rows[i].split('\t').map(val => val.trim()); // Use '\t' or ',' based on your CSV
             const rowObject = {};
             headers.forEach((header, index) => {
                 rowObject[header] = values[index];
@@ -86,19 +87,30 @@ function populateControls() {
         case 'standardBooks':
             dataToUse = standardBooksData;
             pyqsYearContainer.style.display = 'none';
-            // Check if STANDARD_BOOKS_SHEET_URL is still placeholder
+            generateMCQsFromSummaryBtn.style.display = 'none';
+            // This check for placeholder URL is now less critical since you provided correct ones
             if (STANDARD_BOOKS_SHEET_URL.includes('YOUR_') && Object.keys(standardBooksData).length === 0) {
                 subjectSelect.innerHTML = '<option value="">Please configure Standard Books Sheet URL first</option>';
                 topicSelect.innerHTML = '<option value="">Select a subject first</option>';
-                return; // Stop further population until URL is configured
+                return;
             }
-            generateMCQsFromSummaryBtn.style.display = 'none';
             break;
         case 'pyqs':
             populatePyqsYears();
             pyqsYearContainer.style.display = 'block';
             dataToUse = pyqsData; // PYQs data could be from a sheet or just dynamic topics/years
             generateMCQsFromSummaryBtn.style.display = 'none';
+            break;
+        case 'currentAffairs': // New case for Current Affairs
+            dataToUse = currentAffairsData;
+            pyqsYearContainer.style.display = 'none';
+            generateMCQsFromSummaryBtn.style.display = 'none';
+            // This check for placeholder URL is now less critical since you provided correct ones
+            if (CURRENT_AFFAIRS_SHEET_URL.includes('YOUR_') && Object.keys(currentAffairsData).length === 0) {
+                subjectSelect.innerHTML = '<option value="">Please configure Current Affairs Sheet URL first</option>';
+                topicSelect.innerHTML = '<option value="">Select a subject first</option>';
+                return;
+            }
             break;
     }
 
@@ -133,6 +145,9 @@ function populateSubtopics() {
             break;
         case 'pyqs':
             dataToUse = pyqsData; // For PYQs, 'subjects' might be years or static categories
+            break;
+        case 'currentAffairs': // New case for Current Affairs
+            dataToUse = currentAffairsData;
             break;
     }
 
@@ -289,6 +304,10 @@ async function handleAPIGeneration(requestType, dataContent = '', keywords = '')
             content = standardBooksData[selectedSubject][selectedTopic].content;
             keywords = standardBooksData[selectedSubject][selectedTopic].keywords || keywords;
             title = `${selectedSubject} - ${selectedTopic} (Standard Book)`;
+        } else if (currentContentType === 'currentAffairs' && currentAffairsData[selectedSubject] && currentAffairsData[selectedSubject][selectedTopic]) { // New Current Affairs content handling
+            content = currentAffairsData[selectedSubject][selectedTopic].content;
+            keywords = currentAffairsData[selectedSubject][selectedTopic].keywords || keywords;
+            title = `${selectedSubject} - ${selectedTopic} (Current Affairs)`;
         } else if (requestType === 'mcqFromSummary' && dataContent) {
             content = dataContent; // Use the generated summary as content
             title = "from Generated Summary";
@@ -303,7 +322,7 @@ async function handleAPIGeneration(requestType, dataContent = '', keywords = '')
             loadingIndicator.style.display = 'none';
             contentArea.innerHTML = `<p style="color: red; text-align: center; padding: 20px; border: 1px solid red; background-color: #ffebee; border-radius: 5px;">
                 Please select a Subject and Topic.
-                ${currentContentType === 'standardBooks' && STANDARD_BOOKS_SHEET_URL.includes('YOUR_') ? '<br><br><strong>Note:</strong> Standard Books Sheet URL is not configured.' : ''}
+                ${(currentContentType === 'standardBooks' && STANDARD_BOOKS_SHEET_URL.includes('YOUR_')) || (currentContentType === 'currentAffairs' && CURRENT_AFFAIRS_SHEET_URL.includes('YOUR_')) ? '<br><br><strong>Note:</strong> Sheet URL is not configured for the selected content type.' : ''}
             </p>`;
             return;
         }
@@ -344,8 +363,8 @@ async function handleAPIGeneration(requestType, dataContent = '', keywords = '')
 
     try {
         // --- THIS IS THE CRITICAL CHANGE ---
-        // Call your Netlify serverless function instead of directly calling Gemini
-        const cloudRunFunctionUrl = "https://upsc-prelims-apps-986945037743.asia-south1.run.app"; // Replaced with your actual Cloud Run URL
+        // Call your Cloud Run backend instead of directly calling Gemini
+        const cloudRunFunctionUrl = "https://upsc-prelims-apps-986945037743.asia-south1.run.app"; // Your actual Cloud Run URL
         const response = await fetch(cloudRunFunctionUrl, {
             method: 'POST',
             headers: {
@@ -356,11 +375,11 @@ async function handleAPIGeneration(requestType, dataContent = '', keywords = '')
 
         if (!response.ok) {
             const errorData = await response.json();
-            throw new Error(`API Error from serverless function: ${response.status} ${response.statusText}. Details: ${errorData.message || JSON.stringify(errorData)}`);
+            throw new Error(`API Error from Cloud Run function: ${response.status} ${response.statusText}. Details: ${errorData.message || JSON.stringify(errorData)}`);
         }
 
         const data = await response.json();
-        const generatedText = data.text; // Assuming your serverless function returns { text: "..." }
+        const generatedText = data.text; // Assuming your Cloud Run function returns { text: "..." }
 
         if (requestType === 'summary') {
             currentSummary = generatedText; // Store for future MCQ generation
@@ -370,7 +389,8 @@ async function handleAPIGeneration(requestType, dataContent = '', keywords = '')
         } else if (requestType === 'mcq' || requestType === 'mcqFromSummary') {
             const cleanHtml = cleanHTML(generatedText); // Try to parse as JSON first
             try {
-                const mcqs = JSON.parse(cleanHtml.replace(/<pre><code>|<\/code><\/pre>/g, '')); // Remove pre/code tags for parsing
+                // Remove pre/code tags for parsing, assuming cleanHTML might add them
+                const mcqs = JSON.parse(cleanHtml.replace(/<pre><code>|<\/code><\/pre>/g, ''));
                 displayMCQs(mcqs);
             } catch (e) {
                 // If it's not valid JSON, display it as plain text for debugging
@@ -384,8 +404,8 @@ async function handleAPIGeneration(requestType, dataContent = '', keywords = '')
     } catch (error) {
         console.error('Error generating content:', error);
         contentArea.innerHTML = `<p style="color: red; text-align: center; padding: 20px; border: 1px solid red; background-color: #ffebee; border-radius: 5px;">Failed to generate content.
-            This might be due to a network issue or an issue with the serverless function.
-            Please ensure your Netlify function is deployed correctly and the API key is set.<br><br><strong>Error:</strong> ${error.message}</p>`;
+            This might be due to a network issue or an issue with the Cloud Run function.
+            Please ensure your Cloud Run function is deployed correctly and accessible.<br><br><strong>Error:</strong> ${error.message}</p>`;
     } finally {
         loadingIndicator.style.display = 'none';
     }
@@ -410,6 +430,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         // Fetch data for the selected type if not already fetched
         if (currentContentType === 'standardBooks' && Object.keys(standardBooksData).length === 0) {
             standardBooksData = await fetchSheetData(STANDARD_BOOKS_SHEET_URL);
+        }
+        if (currentContentType === 'currentAffairs' && Object.keys(currentAffairsData).length === 0) { // Fetch Current Affairs data
+            currentAffairsData = await fetchSheetData(CURRENT_AFFAIRS_SHEET_URL);
         }
         // PYQs data doesn't need to be loaded from a sheet for just years, but if you want topic-wise PYQs from a sheet, you'd fetch it here.
         // For now, populatePyqsYears generates years dynamically.

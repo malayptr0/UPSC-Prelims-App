@@ -345,7 +345,8 @@ async function handleAPIGeneration(requestType, dataContent = '', keywords = '')
     try {
         // --- THIS IS THE CRITICAL CHANGE ---
         // Call your Netlify serverless function instead of directly calling Gemini
-        const response = await fetch('/.netlify/functions/generate-content', {
+        const cloudRunFunctionUrl = "https://upsc-prelims-apps-986945037743.asia-south1.run.app"; // Replaced with your actual Cloud Run URL
+        const response = await fetch(cloudRunFunctionUrl, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
